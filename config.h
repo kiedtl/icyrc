@@ -1,6 +1,6 @@
 #define VERSION "icyrc 0.2 (https://github.com/icyphox/icyrc)"
 
-#define SCROLL   15
+#define SCROLL   5
 #define INDENT   25
 
 /* uncomment to enable date formatting; prepends to each msg */
@@ -18,10 +18,11 @@
 
 /* enable notifications (notify-send) */
 
-#define NOTIFY   1
+#define NOTIFY   0
 
 /* server */
-#define SRV      "irc.icyphox.sh"
+#define SRV      "irc.freenode.net"
+
 /* port */
-#define PORT     "6666"
+#define PORT     "6667"
 

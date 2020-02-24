@@ -567,12 +567,12 @@ uparse(char *m)
         tredraw();
         return;
     }
-    if (!strncmp("/r", p, 2)) { /* Send raw. */
+    if (!strncmp("/raw", p, 4)) { /* Send raw. */
         if (p[1])
-            sndf("%s", &p[3]);
+            sndf("%s", &p[5]);
         return;
     }
-    if (!strncmp("/x", p, 2)) {/* Quit. */
+    if (!strncmp("/quit", p, 5)) {/* Quit. */
         quit = 1;
         return;
     }
