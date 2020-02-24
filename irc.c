@@ -554,11 +554,11 @@ uparse(char *m)
         tredraw();
         return;
     }
-    if (!strncmp("/q", p, 2)) { /* Private message. */
+    if (!strncmp("/query", p, 6)) { /* Private message. */
         int len = strlen(m);
         char *temp = (char *) malloc (len * (sizeof(char))), *msg;
         strcpy(temp, p);
-        temp += 3;
+        temp += 7;
         char *u = strtok(temp, " ");
         msg = strtok(NULL, "\0");
         chadd(u, 1);
