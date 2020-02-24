@@ -1,6 +1,6 @@
 #define VERSION "icyrc 0.2 (https://github.com/icyphox/icyrc)"
 
-#define SCROLL   5
+#define SCROLL   15
 #define INDENT   25
 
 /* uncomment to enable date formatting; prepends to each msg */
