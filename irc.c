@@ -551,10 +551,18 @@ uparse(char *m)
 				return; /* Cannot leave server window. */
 			strcat(p, chl[ch].name);
 		}
+
 		p = strtok(p, " ");
 		while (p) {
-			if (chdel(p))
-				sndf("PART %s", p);
+			if (chdel(p)) {
+				/*
+				 * don't send PART if buffer is,
+				 * say, a private msg buffer.
+				 */
+				if (p[0] == '#')
+					sndf("PART %s", p);
+			}
+
 			p = strtok(0, " ");
 		}
 		tredraw();
