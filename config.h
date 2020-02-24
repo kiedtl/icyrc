@@ -7,11 +7,10 @@
 // #define DATEFMT  "%H:%M"
 
 /* normal msg    "nick    msg" */
-#define PFMT     "%-15s   %s"
+#define PFMT     "%12s %s"
+
 /* action msg    "nick    msg" */
-#define AFMT     "* %-15s %s"
-/* highlight msg  "nick   msg" */
-#define PFMTHIGH "%-15s]  %s"
+#define AFMT     "%12s %s %s"
 
 /* command that STDOUTs a password in a single line */
 #define PWCMD    "pash show freenode"

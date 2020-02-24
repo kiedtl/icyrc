@@ -62,6 +62,7 @@ static struct {
     SSL *ssl;
     SSL_CTX *ctx;
 } srv;
+
 static char nick[64];
 static int quit, winchg;
 static int nch, ch; /* Current number of channels, and current channel. */
@@ -466,11 +467,16 @@ scmd(char *usr, char *cmd, char *par, char *data)
         c = chfind(chan);
         if (strstr(data, "\001ACTION") != NULL) {
             char *s = strremove(data, "\001ACTION ");
-            pushf(c, AFMT, usr, s);
+            pushf(c, AFMT, "*", usr, s);
             pushed = 1;
         }
-        if (strcasestr(data, nick)) {
-            pushf(c, PFMTHIGH, usr, data);
+        if (strcasestr(data, nick)) { /* when mentioned */
+            char tmp[strlen(usr) + 2];
+            strcpy(tmp, "<");
+            strcat(tmp, usr);
+            strcat(tmp, ">");
+
+            pushf(c, PFMT, tmp, data);
             pushed = 1;
             char cmd[256];
             if (NOTIFY) {
@@ -492,11 +498,11 @@ scmd(char *usr, char *cmd, char *par, char *data)
     } else if (!strcmp(cmd, "PART")) {
         if (!pm)
             return;
-        pushf(chfind(pm), "! %-12s has left %s", usr, pm);
+        pushf(chfind(pm), "%12s %s has left %s", "<--", usr, pm);
     } else if (!strcmp(cmd, "JOIN")) {
         if (!pm)
             return;
-        pushf(chfind(pm), "! %-12s has joined %s", usr, pm);
+        pushf(chfind(pm), "%12s %s has joined %s", "-->", usr, pm);
     } else if (!strcmp(cmd, "470")) { /* Channel forwarding. */
         char *ch = strtok(0, " "), *fch = strtok(0, " ");
 
@@ -578,7 +584,10 @@ uparse(char *m)
     }
     if (!strncmp("/me", p, 3)) {
         char *s = strremove(p, "/me");
-        pushf(ch, AFMT, nick, s);
+
+        if (s[0] == ' ') s++;
+
+        pushf(ch, AFMT, "*", nick, s);
         sndf("PRIVMSG %s :\001ACTION %s\001", chl[ch].name, s);
     }
     else {
@@ -587,6 +596,7 @@ uparse(char *m)
         m += strspn(m, " ");
         if (!*m)
             return;
+
         pushf(ch, PFMT, nick, m);
         sndf("PRIVMSG %s :%s", chl[ch].name, m);
         return;
