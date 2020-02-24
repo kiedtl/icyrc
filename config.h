@@ -14,7 +14,7 @@
 #define PFMTHIGH "%-15s]  %s"
 
 /* command that STDOUTs a password in a single line */
-#define PWCMD    "pw -s ircpass"
+#define PWCMD    "pash show freenode"
 
 /* enable notifications (notify-send) */
 
