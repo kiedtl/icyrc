@@ -547,8 +547,12 @@ uparse(char *m)
 		p += 1 + (p[2] == ' ');
 
 		if (!*p) {
-			if (ch == 0)
-				return; /* Cannot leave server window. */
+			/* Cannot leave server window. */
+			if (ch == 0) {
+				pushf(0, "%12s error: cannot leave main buffer!", "--");
+				return;
+			}
+
 			strcat(p, chl[ch].name);
 		}
 
@@ -561,6 +565,8 @@ uparse(char *m)
 				 */
 				if (p[0] == '#')
 					sndf("PART %s", p);
+			} else {
+				pushf(0, "%12s error: invalid buffer name.", "--");
 			}
 
 			p = strtok(0, " ");
