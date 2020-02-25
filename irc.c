@@ -498,6 +498,8 @@ scmd(char *usr, char *cmd, char *par, char *data)
 		if (!pm)
 			return;
 		pushf(chfind(pm), "%12s %s has left %s", "<--", usr, pm);
+	} else if (!strcmp(cmd, "QUIT")) {
+		pushf(chfind(chl[ch].name), "%12s %s has quit", "<--", usr);
 	} else if (!strcmp(cmd, "JOIN")) {
 		if (!pm)
 			return;
@@ -517,8 +519,6 @@ scmd(char *usr, char *cmd, char *par, char *data)
 			pushf(0, "-!- Cannot join channel %s (%s)", pm, cmd);
 			tredraw();
 		}
-	} else if (!strcmp(cmd, "QUIT")) { /* Commands we don't care about. */
-		return;
 	} else if (!strcmp(cmd, "NOTICE") || !strcmp(cmd, "375")
 		   || !strcmp(cmd, "372") || !strcmp(cmd, "376")) {
 		pushf(0, "%s", data ? data : "");
