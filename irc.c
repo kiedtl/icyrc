@@ -544,9 +544,12 @@ uparse(char *m)
 		return;
 	}
 	if (!strncmp("/l", p, 2)) {/* Leave channels. */
-		p += 1 + (p[2] == ' ');
+		if (p[2] == ' ')
+			p += 2;
+		else
+			p += 1;
 
-		if (!*p) {
+		if (!(*(++p))) {
 			/* Cannot leave server window. */
 			if (ch == 0) {
 				pushf(0, "%12s cannot leave main buffer!", "error:");
