@@ -1,3 +1,6 @@
 [submodule "sub/ccommon"]
 	path = sub/ccommon
 	url = https://github.com/lptstr/ccommon
+[submodule "sub/map"]
+	path = sub/map
+	url = https://github.com/rxi/map
