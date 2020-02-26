@@ -1,25 +1,50 @@
-BIN = irc
-SRC = irc.c utf8.c
-OBJ = $(SRC:.c=.o)
+#
+# icyrc: simple irc client
+# (c) Kied Llaentenn
+# See the LICENSE for more information
+#
 
-CFLAGS = -std=c99 -O1 -D_POSIX_C_SOURCE=201112 -D_GNU_SOURCE \
-	 -D_XOPEN_CURSES -D_XOPEN_SOURCE_EXTENDED=1 \
-	 -D_DEFAULT_SOURCE -D_BSD_SOURCE \
-	 -I. -Isub/ccommon
-LDFLAGS = -lncursesw -lssl -lcrypto
+DESTDIR =
+PREFIX  = /usr/local/
 
-all: ${BIN}
+BIN     = irc
+SRC     = $(BIN).c utf8.c
+OBJ     = $(SRC:.c=.o)
 
-$(BIN): $(OBJ)
-	$(CC) $(CFLAGS) $(LDFLAGS) -o $(BIN) $(OBJ)
+WARNING = -Wall -Wextra -pedantic -Wmissing-prototypes \
+          -Wold-style-definition -Wno-unused-parameter
 
-install:
-	install -Dm755 ${BIN} $(DESTDIR)$(PREFIX)/bin/${BIN}
+INC	= -I. -Isub/ccommon/
 
-uninstall:
-	rm -f $(DESTDIR)$(PREFIX)/bin/${BIN}
+CC      = gcc
+LD      = gold
+CFLAGS  = -std=c99 $(WARNING) $(INC) \
+          -D_POSIX_C_SOURCE=201112 -D_GNU_SOURCE \
+          -D_XOPEN_CURSES -D_XOPEN_SOURCE_EXTENDED=1 \
+          -D_DEFAULT_SOURCE -D_BSD_SOURCE
+LDFLAGS = -fuse-ld=$(LD) -lncursesw -lssl -lcrypto
+
+all: debug
 
 clean:
-	rm -f ${BIN} *.o
+	rm -f $(BIN) $(OBJ)
 
-.PHONY: all clean
+.c.o:
+	$(CC) $(CFLAGS) $(CFLAGS_OPT) -c $<
+
+debug: CFLAGS_OPT := -O1 -ggdb
+debug: $(BIN)
+
+release: CFLAGS_OPT := -O4 -s
+release: $(BIN)
+
+$(BIN): $(OBJ)
+	$(CC) -o $@ $^ $(CFLAGS) $(CFLAGS_OPT) $(LDFLAGS)
+
+install: $(BIN)
+	install -m755 ./$(BIN) $(DESTDIR)/$(PREFIX)/bin/$(BIN)
+
+uninstall:
+	rm -f $(DESTDIR)/$(PREFIX)/bin/$(BIN)
+
+.PHONY: all debug release clean install uninstall
