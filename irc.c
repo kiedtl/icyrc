@@ -19,13 +19,13 @@
 #include <netinet/tcp.h>
 #include <netdb.h>
 #include <locale.h>
-#include <wchar.h>
 #include <openssl/ssl.h>
 
 #undef CTRL
 #define CTRL(x)  (x & 037)
 
 #include "config.h"
+#include "utf8.h"
 
 enum {
 	ChanLen = 64,
@@ -34,11 +34,7 @@ enum {
 	BufSz = 2048,
 	LogSz = 4096,
 	MaxRecons = 10, /* -1 for infinitely many */
-	UtfSz = 4,
-	RuneInvalid = 0xFFFD,
 };
-
-typedef wchar_t Rune;
 
 static struct {
 	int x;
@@ -69,11 +65,6 @@ static int nch, ch; /* Current number of channels, and current channel. */
 static char outb[BufSz], *outp = outb; /* Output buffer. */
 static FILE *logfp;
 
-static unsigned char utfbyte[UtfSz + 1] = {0x80,    0, 0xC0, 0xE0, 0xF0};
-static unsigned char utfmask[UtfSz + 1] = {0xC0, 0x80, 0xE0, 0xF0, 0xF8};
-static Rune utfmin[UtfSz + 1] = {       0,    0,  0x80,  0x800,  0x10000};
-static Rune utfmax[UtfSz + 1] = {0x10FFFF, 0x7F, 0x7FF, 0xFFFF, 0x10FFFF};
-
 static void scmd(char *, char *, char *, char *);
 static void tdrawbar(void);
 static void tredraw(void);
@@ -87,69 +78,6 @@ panic(const char *m)
 	exit(1);
 }
 
-static size_t
-utf8validate(Rune *u, size_t i)
-{
-	if (*u < utfmin[i] || *u > utfmax[i] || (0xD800 <= *u && *u <= 0xDFFF))
-		*u = RuneInvalid;
-	for (i = 1; *u > utfmax[i]; ++i);
-	return i;
-}
-
-static Rune
-utf8decodebyte(unsigned char c, size_t *i)
-{
-	for (*i = 0; *i < UtfSz + 1; ++(*i))
-		if ((c & utfmask[*i]) == utfbyte[*i])
-			return c & ~utfmask[*i];
-	return 0;
-}
-
-static size_t
-utf8decode(char *c, Rune *u, size_t clen)
-{
-	size_t i, j, len, type;
-	Rune udecoded;
-
-	*u = RuneInvalid;
-	if (!clen)
-		return 0;
-	udecoded = utf8decodebyte(c[0], &len);
-	if (len < 1 || len > UtfSz)
-		return 1;
-	for (i = 1, j = 1; i < clen && j < len; ++i, ++j) {
-		udecoded = (udecoded << 6) | utf8decodebyte(c[i], &type);
-		if (type != 0)
-			return j;
-	}
-	if (j < len)
-		return 0;
-	*u = udecoded;
-	utf8validate(u, len);
-	return len;
-}
-
-static char
-utf8encodebyte(Rune u, size_t i)
-{
-	return utfbyte[i] | (u & ~utfmask[i]);
-}
-
-static size_t
-utf8encode(Rune u, char *c)
-{
-	size_t len, i;
-
-	len = utf8validate(&u, 0);
-	if (len > UtfSz)
-		return 0;
-	for (i = len - 1; i != 0; --i) {
-		c[i] = utf8encodebyte(u, 0);
-		u >>= 6;
-	}
-	c[0] = utf8encodebyte(u, len);
-	return len;
-}
 
 static void
 sndf(const char *fmt, ...)
