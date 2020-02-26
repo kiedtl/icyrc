@@ -25,7 +25,6 @@
 #define CTRL(x)  (x & 037)
 
 #include "config.h"
-#include "map.h"
 #include "utf8.h"
 
 enum {
@@ -65,8 +64,6 @@ static int quit, winchg;
 static int nch, ch; /* Current number of channels, and current channel. */
 static char outb[BufSz], *outp = outb; /* Output buffer. */
 static FILE *logfp;
-
-map_str_t users; /* list of users and what channels they joined. */
 
 static void scmd(char *, char *, char *, char *);
 static void tdrawbar(void);
@@ -429,52 +426,12 @@ scmd(char *usr, char *cmd, char *par, char *data)
 		if (!pm)
 			return;
 		pushf(chfind(pm), "%12s %s has left %s", "<--", usr, pm);
-
-		/* TODO: cleanup this user map business */
-		/* remove channel from user entry in usermap */
-		char *old = (char*) map_get(&users, usr);
-		char *new = (char*) malloc(strlen(old) - strlen(pm) + 1);
-		if (new == NULL) exit(12);
-		new[strlen(old) - strlen(pm)] = 0;
-
-		char *buf;
-		while ((buf = strsep(&old, ","))) {
-			if (!strcmp(pm, buf)) {
-				strcat(new, buf);
-				strcat(new, ",");
-			}
-		}
-
-		map_set(&users, usr, new);
 	} else if (!strcmp(cmd, "QUIT")) {
-		char *channels = (char*) map_get(&users, usr);
-		if (channels == NULL || strlen(channels) == 0)
-			return;
-
-		char *chan;
-		while ((chan = strsep(&channels, ",")))
-			pushf(chfind(chl[ch].name), "%12s %s has quit", "<--", usr);
-		map_remove(&users, usr);
+		pushf(chfind(pm), "%12s %s has quit", "<--", usr);
 	} else if (!strcmp(cmd, "JOIN")) {
 		if (!pm)
 			return;
 		pushf(chfind(pm), "%12s %s has joined %s", "-->", usr, pm);
-
-		/* add to user map */
-		char *channels = (char*) map_get(&users, usr);
-		if (channels == NULL) {
-			map_set(&users, usr, pm);
-		} else {
-			/* don't forget the delimiter and nul terminator! */
-			char *data = malloc(strlen(pm) + strlen(channels) + 2);
-			data[strlen(pm) + strlen(channels) + 1] = 0;
-
-			strcpy(data, channels);
-			strcat(data, ",");
-			strcat(data, pm);
-			map_set(&users, usr, data);
-		}
-
 	} else if (!strcmp(cmd, "470")) { /* Channel forwarding. */
 		char *ch = strtok(0, " "), *fch = strtok(0, " ");
 
@@ -847,8 +804,6 @@ treset(void)
 int
 main(int argc, char *argv[])
 {
-	map_init(&users);
-
 	const char *user = getenv("USER");
 	const char *ircnick = getenv("IRCNICK");
 	char key[128];
@@ -980,7 +935,5 @@ main(int argc, char *argv[])
 	while (nch--)
 		free(chl[nch].buf);
 	treset();
-
-	map_deinit(&users);
 	exit(0);
 }
