@@ -1,3 +1,5 @@
 irc
 **/*.sw[po]
 **/*.o
+
+sub/map/src/map.o
