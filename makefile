@@ -8,10 +8,10 @@ DESTDIR =
 PREFIX  = /usr/local/
 
 BIN     = irc
-SRC     = $(BIN).c utf8.c sub/map/src/map.c
+SRC     = $(BIN).c utf8.c
 OBJ     = $(SRC:.c=.o)
 
-INC	= -I. -Isub/ccommon/ -Isub/map/src
+INC	= -I. -Isub/ccommon/
 
 CC      = gcc
 LD      = gold
