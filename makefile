@@ -8,17 +8,14 @@ DESTDIR =
 PREFIX  = /usr/local/
 
 BIN     = irc
-SRC     = $(BIN).c utf8.c
+SRC     = $(BIN).c utf8.c sub/map/src/map.c
 OBJ     = $(SRC:.c=.o)
 
-WARNING = -Wall -Wextra -pedantic -Wmissing-prototypes \
-          -Wold-style-definition -Wno-unused-parameter
-
-INC	= -I. -Isub/ccommon/
+INC	= -I. -Isub/ccommon/ -Isub/map/src
 
 CC      = gcc
 LD      = gold
-CFLAGS  = -std=c99 $(WARNING) $(INC) \
+CFLAGS  = -std=c99 -pedantic $(INC) \
           -D_POSIX_C_SOURCE=201112 -D_GNU_SOURCE \
           -D_XOPEN_CURSES -D_XOPEN_SOURCE_EXTENDED=1 \
           -D_DEFAULT_SOURCE -D_BSD_SOURCE
@@ -30,7 +27,7 @@ clean:
 	rm -f $(BIN) $(OBJ)
 
 .c.o:
-	$(CC) $(CFLAGS) $(CFLAGS_OPT) -c $<
+	$(CC) $(CFLAGS) $(CFLAGS_OPT) -c $< -o $(<:.c=.o)
 
 debug: CFLAGS_OPT := -O1 -ggdb
 debug: $(BIN)
