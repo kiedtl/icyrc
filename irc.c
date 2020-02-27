@@ -427,7 +427,7 @@ scmd(char *usr, char *cmd, char *par, char *data)
 			return;
 		pushf(chfind(pm), "%12s %s has left %s", "<--", usr, pm);
 	} else if (!strcmp(cmd, "QUIT")) {
-		pushf(chfind(pm), "%12s %s has quit", "<--", usr);
+		pushf(chfind(chl[ch].name), "%12s %s has quit", "<--", usr);
 	} else if (!strcmp(cmd, "JOIN")) {
 		if (!pm)
 			return;
